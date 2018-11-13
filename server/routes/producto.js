@@ -69,9 +69,13 @@ app.get('/producto/:id', verificaToken, (req, res) => {
 // Buscar productos
 app.get('/producto/buscar/:termino', verificaToken, (req, res) => {
     let termino = req.params.termino;
-    let regex = new RegExp(termino, 'i');
+
+    let busqueda = normalizar(termino);
+    let regex = new RegExp(busqueda, 'i');
+    let regex2 = new RegExp(termino, 'i')
 
     Producto.find({ nombre: regex })
+        .find({ nombre: regex2 })
         .populate('categoria', 'nombre')
         .exec((err, productos) => {
             if (err) {
@@ -85,7 +89,6 @@ app.get('/producto/buscar/:termino', verificaToken, (req, res) => {
                 productos
             })
         })
-
 });
 
 app.post('/producto', verificaToken, (req, res) => {
@@ -194,5 +197,12 @@ app.delete('/producto/:id', verificaToken, (req, res) => {
         });
     });
 });
+
+function normalizar(s) {
+    var s1 = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç";
+    var s2 = "AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuunncc";
+    for (var i = 0; i < s1.length; i++) s = s.replace(new RegExp(s1.charAt(i), 'g'), s2.charAt(i));
+    return s;
+}
 
 module.exports = app;
